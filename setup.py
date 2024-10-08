@@ -8,7 +8,7 @@ setup(
         "numpy",
         "hydra-core",
         "omegaconf",
-        "cv2",
+        "opencv-python",
         "matplotlib",
     ],
     author="Moritz Hesche",
