@@ -1,7 +1,7 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
 
-from ml_utils.array_typing import NpArray
+from mlutils.array_typing import NpArray
 
 
 def position_rotation2pose(
