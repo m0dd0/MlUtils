@@ -3,9 +3,7 @@ import datetime
 
 import numpy as np
 import cv2
-
-from casero.array_typing import NpArray
-
+import jaxtyping as jt
 
 class NpzSaver:
     def __init__(self, filename: Path, allow_overwrite: bool = True):
@@ -105,7 +103,7 @@ class PngSaver:
         self.filename = Path(filename)
         self.allow_overwrite = allow_overwrite
 
-    def __call__(self, image_data: NpArray["h,w,3"], **metadata):
+    def __call__(self, image_data: jt.Float[np.ndarray, "h w 3"], **metadata):
         if self.filename.exists() and not self.allow_overwrite:
             raise FileExistsError(f"{self.filename} already exists")
 

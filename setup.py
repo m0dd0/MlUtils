@@ -10,7 +10,7 @@ setup(
         "omegaconf",
         "opencv-python",
         "matplotlib",
-        "torch",
+        "jaxtyping",
     ],
     author="Moritz Hesche",
     author_email="mo.hesche@gmail.com",
