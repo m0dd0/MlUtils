@@ -1,6 +1,6 @@
 from pathlib import Path
 import abc
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Tuple
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -53,26 +53,3 @@ class Plotter(abc.ABC):
     @abc.abstractmethod
     def __call__(self, **plotting_data) -> Tuple[plt.Figure, plt.Axes]:
         raise NotImplementedError
-
-
-class TimeBetweenSamplePlotter(Plotter):
-    def __call__(
-        self, recording_data: Dict[str, Dict[str, Tuple[List[float], List[Any]]]]
-    ) -> Tuple[plt.Figure, plt.Axes]:
-        fig, ax = plt.subplots()
-
-        for obj, topic_data in recording_data.items():
-            for topic, (timestamps, _) in topic_data.items():
-                diffs = np.diff(timestamps)
-                diffs = np.append(
-                    diffs, 0
-                )  # add a 0 at the end to make the lengths match
-                ax.plot(timestamps, diffs, label=f"{obj}.{topic}")
-
-        ax.legend()
-        ax.set_xlabel("Timestamp")
-        ax.set_ylabel("Time between samples")
-
-        self._save_and_and_show(fig)
-
-        return fig, ax
