@@ -5,12 +5,24 @@ import numpy as np
 import cv2
 import jaxtyping as jt
 
+
 class NpzSaver:
     def __init__(self, filename: Path, allow_overwrite: bool = True):
+        """Save data to an npz file.
+
+        Args:
+            filename (Path): The path to the npz file.
+            allow_overwrite (bool, optional): Whether to allow overwriting existing files. Defaults to True.
+        """
         self.filename = Path(filename)
         self.allow_overwrite = allow_overwrite
 
     def __call__(self, **data):
+        """Save the given data to an npz file.
+
+        Args:
+            **data: The data to save.
+        """
         if self.filename.exists() and not self.allow_overwrite:
             raise FileExistsError(f"{self.filename} already exists")
 
@@ -27,6 +39,16 @@ class NpzBatchSaver:
         allow_overwrite: bool = True,
         number_of_digits: int = 4,
     ):
+        """Save data to npz files.
+        Each time the saver is called, a new file is created with the given data.
+
+        Args:
+            output_dir (Path): The directory where the npz files will be saved.
+            file_prefix (str): The prefix for the npz files.
+            use_datetime (bool, optional): Whether to use the current datetime in the filename. Defaults to False.
+            allow_overwrite (bool, optional): Whether to allow overwriting existing files. Defaults to True.
+            number_of_digits (int, optional): The number of digits to use in the filename. Defaults to 4.
+        """
         self.output_dir = Path(output_dir)
         self.file_prefix = file_prefix
         self.use_datetime = use_datetime
@@ -36,6 +58,11 @@ class NpzBatchSaver:
         self.i = 0
 
     def __call__(self, **data) -> Path:
+        """Save the given data to an npz file.
+
+        Returns:
+            Path: The path to the saved npz file.
+        """
         if self.use_datetime:
             now = datetime.datetime.now()
             filename = now.strftime(f"{self.file_prefix}_%Y-%m-%d_%H-%M-%S.npz")
@@ -55,6 +82,13 @@ class NpzBatchSaver:
 
 class NpzLoader:
     def __init__(self, filename: Path, as_dict: bool = True):
+        """Load an npz file.
+
+        Args:
+            filename (Path): The path to the npz file.
+            as_dict (bool, optional): Whether to load the npz file as a dictionary
+                or as a np.lib.npyio.NpzFile object. Defaults to True.
+        """
         self.filename = Path(filename)
         self.as_dict = as_dict
 
@@ -70,6 +104,13 @@ class NpzBatchLoader:
     def __init__(
         self, input_dir: Path, ignore_subdirs: bool = True, as_dict: bool = True
     ):
+        """An Iterator over all npz files in a directory.
+
+        Args:
+            input_dir (Path): The directory containing the npz files.
+            ignore_subdirs (bool, optional): Whether to ignore subdirectories. Defaults to True.
+            as_dict (bool, optional): Whether to load the npz files as dictionaries. Defaults to True.
+        """
         self.input_dir = Path(input_dir)
         self.ignore_subdirs = ignore_subdirs
         self.as_dict = as_dict
@@ -100,10 +141,25 @@ class NpzBatchLoader:
 
 class PngSaver:
     def __init__(self, filename: Path, allow_overwrite: bool = True):
+        """Save an image to a png file.
+
+        Args:
+            filename (Path): The path to the png file.
+            allow_overwrite (bool, optional): Whether to allow overwriting existing files. Defaults to True.
+        """
         self.filename = Path(filename)
         self.allow_overwrite = allow_overwrite
 
     def __call__(self, image_data: jt.Float[np.ndarray, "h w 3"], **metadata):
+        """Save the given image to a png file.
+
+        Args:
+            image_data (jt.Float[np.ndarray, "h w 3"]): The image data.
+            **metadata: Additional metadata to save with the image.
+
+        Raises:
+            FileExistsError: If the file already exists and allow_overwrite is False.
+        """
         if self.filename.exists() and not self.allow_overwrite:
             raise FileExistsError(f"{self.filename} already exists")
 
