@@ -2,8 +2,8 @@ from pathlib import Path
 import datetime
 
 import numpy as np
-import cv2
 import jaxtyping as jt
+from PIL import Image
 
 
 class NpzSaver:
@@ -150,7 +150,7 @@ class PngSaver:
         self.filename = Path(filename)
         self.allow_overwrite = allow_overwrite
 
-    def __call__(self, image_data: jt.Float[np.ndarray, "h w 3"], **metadata):
+    def __call__(self, image_data: jt.Float[np.ndarray, "h w 3"]):
         """Save the given image to a png file.
 
         Args:
@@ -164,4 +164,6 @@ class PngSaver:
             raise FileExistsError(f"{self.filename} already exists")
 
         self.filename.parent.mkdir(parents=True, exist_ok=True)
-        cv2.imwrite(str(self.filename), cv2.cvtColor(image_data, cv2.COLOR_RGB2BGR))
+
+        image = Image.fromarray((image_data * 255).astype(np.uint8))
+        image.save(self.filename)
