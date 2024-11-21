@@ -1,8 +1,87 @@
 from pathlib import Path
+from typing import List
 
 from tqdm import tqdm
 import numpy as np
 import h5py
+
+
+class Hdf5SubsetExtractor:
+    def __init__(
+        self,
+        hdf5_file_path: str,
+        subset_hdf5_file_path: str,
+        subset_indices: List[int],
+        hdf5_data_group_name: str,
+    ):
+        self.hdf5_file_path = hdf5_file_path
+        self.subset_hdf5_file_path = subset_hdf5_file_path
+        self.subset_indices = subset_indices
+        self.hdf5_data_group_name = hdf5_data_group_name
+
+        self.hdf5_file = h5py.File(hdf5_file_path, "r")
+        self.subset_hdf5_file = h5py.File(subset_hdf5_file_path, "w")
+
+        self.data_group = self.hdf5_file[hdf5_data_group_name]
+        self.subset_data_group = self.subset_hdf5_file.create_group(
+            hdf5_data_group_name
+        )
+
+        self.subset_datasets = {
+            key: self.subset_data_group.create_dataset(
+                key,
+                shape=(len(subset_indices),) + self.data_group[key].shape[1:],
+                dtype=self.data_group[key].dtype,
+            )
+            for key in self.data_group.keys()
+        }
+
+    def __call__(self):
+        for i, subset_idx in tqdm(enumerate(self.subset_indices)):
+            for key, dataset in self.data_group.items():
+                self.subset_datasets[key][i] = dataset[subset_idx]
+
+        self.hdf5_file.close()
+        self.subset_hdf5_file.close()
+
+
+class NpzSubsetExtractor:
+    def __init__(
+        self,
+        npz_folder: str,
+        subset_npz_folder: str,
+        subset_indices: List[int],
+        datapoint_naming_format: str = "datapoint_{}.npz",
+        # global_datapoint_search: bool = False,
+    ):
+        self.npz_folder = Path(npz_folder)
+        self.subset_npz_folder = Path(subset_npz_folder)
+        self.subset_indices = subset_indices
+        self.datapoint_naming_format = datapoint_naming_format
+        # self.global_datapoint_search = global_datapoint_search
+
+    def __call__(self):
+        # if self.global_datapoint_search:
+        #     all_npz_files = list(self.npz_folder.glob("*.npz"))
+        # else:
+        #     all_npz_files = [
+        #         self.npz_folder / self.datapoint_naming_format.format(i)
+        #         for i in self.subset_indices
+        #     ]
+
+        subset_npz_files = []
+        for subset_idx in self.subset_indices:
+            subset_npz_file = self.npz_folder / self.datapoint_naming_format.format(
+                subset_idx
+            )
+            if not subset_npz_file.exists():
+                print(f"Datapoint {subset_idx} not found in the npz folder.")
+                continue
+            subset_npz_files.append(subset_npz_file)
+
+        for subset_npz_file in subset_npz_files:
+            subset_npz_data = np.load(subset_npz_file)
+            np.savez(self.subset_npz_folder / subset_npz_file.name, **subset_npz_data)
 
 
 class Hdf5ToNpzDatasetConverter:
