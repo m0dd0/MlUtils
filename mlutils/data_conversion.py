@@ -79,7 +79,7 @@ class NpzSubsetExtractor:
                 continue
             subset_npz_files.append(subset_npz_file)
 
-        for subset_npz_file in subset_npz_files:
+        for subset_npz_file in tqdm(subset_npz_files):
             subset_npz_data = np.load(subset_npz_file)
             np.savez(self.subset_npz_folder / subset_npz_file.name, **subset_npz_data)
 
