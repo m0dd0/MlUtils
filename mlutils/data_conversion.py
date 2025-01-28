@@ -108,6 +108,9 @@ class Hdf5ToNpzDatasetConverter:
         self._n_data_points = datset_lens[0]
         self._n_batches = self._n_data_points // batch_size + 1
 
+        if not self._npz_folder.exists():
+            self._npz_folder.mkdir(parents=True)
+
     def __call__(self):
         for i_batch in tqdm(range(self._n_batches)):
             start_idx = i_batch * self._batch_size
@@ -124,7 +127,10 @@ class Hdf5ToNpzDatasetConverter:
                 )
                 np.savez(
                     npz_file_path,
-                    **{key: value[i_datapoint] for key, value in data_batch.items()},
+                    **{
+                        key: value[i_datapoint - start_idx]
+                        for key, value in data_batch.items()
+                    },
                 )
 
 
